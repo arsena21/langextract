@@ -107,14 +107,13 @@ class QAPromptGenerator:
     """
     question = example.text
 
-    # Build a dictionary for serialization
+    # Build a dictionary for serialization using the correct, static keys.
     data_dict: dict[str, list] = {schema.EXTRACTIONS_KEY: []}
     for extraction in example.extractions:
       data_entry = {
-          f"{extraction.extraction_class}": extraction.extraction_text,
-          f"{extraction.extraction_class}{self.attribute_suffix}": (
-              extraction.attributes or {}
-          ),
+          "extraction_class": extraction.extraction_class,
+          "extraction_text": extraction.extraction_text,
+          "attributes": extraction.attributes or [], # Pass the attributes list through
       }
       data_dict[schema.EXTRACTIONS_KEY].append(data_entry)
 
