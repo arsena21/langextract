@@ -59,6 +59,8 @@ def visualize(*args: Any, **kwargs: Any):
   """Top-level API: lx.visualize(...)."""
   return visualization.visualize(*args, **kwargs)
 
+print("--- SUCCESS: Running from forked langextract repo ---")
+
 
 # PEP 562 lazy loading
 _LAZY_MODULES = {
