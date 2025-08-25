@@ -419,105 +419,52 @@ class Resolver(AbstractResolver):
     logging.info("Completed parsing of string.")
     return extractions
 
-  def extract_ordered_extractions(
+def extract_ordered_extractions(
       self,
       extraction_data: Sequence[Mapping[str, ExtractionValueType]],
   ) -> Sequence[data.Extraction]:
-    """Extracts and orders extraction data based on their associated indexes.
+    """Extracts and orders extraction data based on a simple, static schema.
 
-    This function processes a list of dictionaries, each containing pairs of
-    extraction class keys and their corresponding values, along with optionally
-    associated index keys (identified by the index_suffix). It sorts these pairs
-    by their indices in ascending order and excludes pairs without an index key,
-    returning a list of lists of tuples (extraction_class: str, extraction_text:
-    str).
+    This function processes a list of dictionaries, each expected to have
+    'extraction_class', 'extraction_text', and 'attributes' keys.
 
     Args:
-        extraction_data: A list of dictionaries. Each dictionary contains pairs
-          of extraction class keys and their values, along with optional index
-          keys.
+        extraction_data: A list of dictionaries from the parsed AI response.
 
     Returns:
-        Extractions sorted by the index attribute or by order of appearance. If
-        two
-        extractions have the same index, their group order dictates the sorting
-        order.
-    Raises:
-        ValueError: If the extraction text is not a string or integer, or if the
-        index is not an integer.
+        A sequence of data.Extraction objects.
     """
-    logging.info("Starting to extract and order extractions from data.")
-
+    logging.info("Starting to extract extractions from data.")
     if not extraction_data:
       logging.debug("Received empty extraction data.")
+      return []
 
     processed_extractions = []
-    extraction_index = 0
-    index_suffix = self.extraction_index_suffix
-    attributes_suffix = self.extraction_attributes_suffix
+    for i, item in enumerate(extraction_data):
+      if not isinstance(item, dict):
+        logging.warning("Skipping non-dictionary item in extraction data: %s", item)
+        continue
 
-    for group_index, group in enumerate(extraction_data):
-      for extraction_class, extraction_value in group.items():
-        if index_suffix and extraction_class.endswith(index_suffix):
-          if not isinstance(extraction_value, int):
-            logging.error(
-                "Index must be a string or integer. Found: %s",
-                type(extraction_value),
-            )
-            raise ValueError(
-                "Extraction text must must be a string or integer."
-            )
-          continue
+      extraction_class = item.get("extraction_class")
+      extraction_text = item.get("extraction_text")
+      attributes = item.get("attributes")
 
-        if attributes_suffix and extraction_class.endswith(attributes_suffix):
-          if not isinstance(extraction_value, (dict, type(None))):
-            logging.error(
-                "Attributes must be a dict or None. Found: %s",
-                type(extraction_value),
-            )
-            raise ValueError(
-                "Extraction value must be a dict or None for attributes."
-            )
-          continue
-
-        if not isinstance(extraction_value, ExtractionValueType):
-          logging.error(
-              "Extraction text must be a string or integer. Found: %s",
-              type(extraction_value),
+      if not extraction_class or not extraction_text:
+        logging.warning("Skipping extraction with missing class or text: %s", item)
+        continue
+      
+      # NOTE: We assume the 'attributes' received here is a list of objects,
+      # which will match our updated data.Extraction class.
+      processed_extractions.append(
+          data.Extraction(
+              extraction_class=str(extraction_class),
+              extraction_text=str(extraction_text),
+              attributes=attributes,
+              extraction_index=i,
           )
-          raise ValueError("Extraction text must must be a string or integer.")
-
-        if not isinstance(extraction_value, str):
-          extraction_value = str(extraction_value)
-
-        if index_suffix:
-          index_key = extraction_class + index_suffix
-          extraction_index = group.get(index_key, None)
-          if extraction_index is None:
-            logging.debug(
-                "No index value for %s. Skipping extraction.", extraction_class
-            )
-            continue
-        else:
-          extraction_index += 1
-
-        attributes = None
-        if attributes_suffix:
-          attributes_key = extraction_class + attributes_suffix
-          attributes = group.get(attributes_key, None)
-
-        processed_extractions.append(
-            data.Extraction(
-                extraction_class=extraction_class,
-                extraction_text=extraction_value,
-                extraction_index=extraction_index,
-                group_index=group_index,
-                attributes=attributes,
-            )
-        )
-
-    processed_extractions.sort(key=operator.attrgetter("extraction_index"))
-    logging.info("Completed extraction and ordering of extractions.")
+      )
+    
+    logging.info("Completed extraction of %d items.", len(processed_extractions))
     return processed_extractions
 
 
