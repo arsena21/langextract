@@ -15,6 +15,8 @@
 """Classes used to represent core data types of annotation pipeline."""
 from __future__ import annotations
 
+import typing
+
 import dataclasses
 import enum
 import uuid
@@ -57,7 +59,7 @@ class CharInterval:
 
 
 
-Attribute = types.TypedDict("Attribute", {"key": str, "value": str})
+Attribute = typing.TypedDict("Attribute", {"key": str, "value": str})
 
 
 
