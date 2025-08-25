@@ -138,26 +138,25 @@ class QAPromptGenerator:
     ])
 
   def render(self, question: str, additional_context: str | None = None) -> str:
-    """Generate a text representation of the prompt.
-
-    Args:
-      question: That will be presented to the model.
-      additional_context: Additional context to include in the prompt. An empty
-        string is ignored.
-
-    Returns:
-      Text prompt with a question to be presented to a language model.
-    """
+    """Generate a text representation of the prompt."""
+    logging.info("Step: Starting prompt assembly.")
     prompt_lines: list[str] = [f"{self.template.description}\n"]
+    logging.info("Step: Added description to prompt.")
 
     if additional_context:
       prompt_lines.append(f"{additional_context}\n")
+      logging.info("Step: Added additional_context to prompt.")
 
     if self.template.examples:
       prompt_lines.append(self.examples_heading)
-      for ex in self.template.examples:
+      logging.info("Step: Added 'Examples' heading.")
+      for i, ex in enumerate(self.template.examples):
+        logging.info("Step: Formatting example #%d", i + 1)
         prompt_lines.append(self.format_example_as_text(ex))
 
     prompt_lines.append(f"{self.question_prefix}{question}")
     prompt_lines.append(self.answer_prefix)
-    return "\n".join(prompt_lines)
+    
+    final_prompt = "\n".join(prompt_lines)
+    logging.info("Step: Final prompt fully assembled.")
+    return final_prompt
