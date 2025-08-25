@@ -83,7 +83,8 @@ class Extraction:
   extraction_index: int | None = None
   group_index: int | None = None
   description: str | None = None
-  attributes: dict[str, str | list[str]] | None = None
+  attributes: list[Attribute] | None = None
+
   _token_interval: tokenizer.TokenInterval | None = dataclasses.field(
       default=None, repr=False, compare=False
   )
@@ -99,7 +100,7 @@ class Extraction:
       extraction_index: int | None = None,
       group_index: int | None = None,
       description: str | None = None,
-      attributes: dict[str, str | list[str]] | None = None,
+        attributes: list[Attribute] | None = None,
   ):
     self.extraction_class = extraction_class
     self.extraction_text = extraction_text
