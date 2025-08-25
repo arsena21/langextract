@@ -419,7 +419,7 @@ class Resolver(AbstractResolver):
     logging.info("Completed parsing of string.")
     return extractions
 
-def extract_ordered_extractions(
+  def extract_ordered_extractions(
       self,
       extraction_data: Sequence[Mapping[str, ExtractionValueType]],
   ) -> Sequence[data.Extraction]:
