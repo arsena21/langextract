@@ -55,6 +55,12 @@ class CharInterval:
   end_pos: int | None = None
 
 
+
+
+Attribute = types.TypedDict("Attribute", {"key": str, "value": str})
+
+
+
 @dataclasses.dataclass(init=False)
 class Extraction:
   """Represents an extraction extracted from text.
