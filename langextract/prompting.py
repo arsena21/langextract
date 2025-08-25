@@ -18,6 +18,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import pathlib
+import logging
 
 import pydantic
 import yaml
@@ -97,14 +98,7 @@ class QAPromptGenerator:
     return self.render("")
 
   def format_example_as_text(self, example: data.ExampleData) -> str:
-    """Formats a single example for the prompt.
-
-    Args:
-      example: The example data to format.
-
-    Returns:
-      A string representation of the example, including the question and answer.
-    """
+    """Formats a single example for the prompt."""
     question = example.text
 
     # Build a dictionary for serialization using the correct, static keys.
@@ -113,9 +107,13 @@ class QAPromptGenerator:
       data_entry = {
           "extraction_class": extraction.extraction_class,
           "extraction_text": extraction.extraction_text,
-          "attributes": extraction.attributes or [], # Pass the attributes list through
+          "attributes": extraction.attributes or [],
       }
       data_dict[schema.EXTRACTIONS_KEY].append(data_entry)
+
+    # ADDED: Log the dictionary structure before it's converted to a string.
+    logging.info("Step: Formatted one example into a dictionary: %s", data_dict)
+
 
     if self.format_type == data.FormatType.YAML:
       formatted_content = yaml.dump(
