@@ -98,7 +98,6 @@ class QAPromptGenerator:
     return self.render("")
 
   def format_example_as_text(self, example: data.ExampleData) -> str:
-    raise Exception("--- PROMPTING.PY IS BEING EXECUTED ---")
     """Formats a single example for the prompt."""
     question = example.text
 
